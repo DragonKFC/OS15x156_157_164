@@ -1,6 +1,5 @@
-# OS15x156_157_164
-project1
-            +--------------------+
+    +--------------------+
+            |       CS 326       |
             | PROJECT 1: THREADS |
             |   DESIGN DOCUMENT  |
             +--------------------+
@@ -9,7 +8,7 @@ project1
 
 >> Fill in the names and email addresses of your group members.
 
-顾泉松 <———— >
+顾泉松 <email@domain.example>
 周刚 <email@domain.example>
 侯杰 <email@domain.example>
 
@@ -128,3 +127,41 @@ When a thread access the function thread_set_priority to set its priority to a n
 >> another design you considered?
 
 Initially I tried to recurse through all the list elements in order to get the maximum prioirty in the list. however everytime for everythread the while loop is executed, so it is of order O(N) to get the maximum priority element in the list.By this implementation, getting the maximum priority element from the list is of order O(1).
+
+  ADVANCED SCHEDULER               ==================  ---- DATA STRUCTURES ----  >> C1: Copy here the declaration of each new or changed `struct' or >> `struct' member, global or static variable, `typedef', or >> enumeration.  Identify the purpose of each in 25 words or less. 
+struct thread 
+int nice;                        //stores the nice value of each thread 
+int recent_cpu;                 //stores the CPU time of each thread.
+
+int load_avg;	          //Used to store the system load_avg.
+extern struct list ready_list;
+extern struct list all_list;
+	//Changed the implementation to extern because it has to be used in the timer.c to refresh the priorities adn the recent CPU of all the threads in the lists
+
+void refresh_load_avg(void);  //function to update the load average 
+int refresh_priority(struct thread* a);  //refreshing the priority of the thread 'a' to a new value and returns it.
+int refresh_priority_cur(void);  //refreshing the priority of the current thread and returns it.
+int refresh_recent_cpu(struct thread* t);    //Refeshes the recent CPU of thread t and returns it.
+---- ALGORITHMS ----  >> C2: Suppose threads A, B, and C have nice values 0, 1, and 2.  Each >> has a recent_cpu value of 0.  Fill in the table below showing the >> scheduling decision and the priority and recent_cpu values for each >> thread after each given number of timer ticks:timer  recent_cpu    priority   thread
+ticks   A   B   C   A   B   C   to run
+-----  --  --  --  --  --  --   ------
+ 0	0   0   0  63  61  59   A
+ 4	4   0   0  62  61  59	A
+ 8	8   0   0  61  61  59   B
+12	8   4   0  61  60  59   A
+16     12   4   0  60  60  59   B
+20     12   8   0  60  59  59   A
+24     16   8   0  59  59  59   C
+28     16   8   4  59  59  58   B
+32     16  12   4  59  58  58   A
+36     20  12   4  58  58  58   C
+>> C3: Did any ambiguities in the scheduler specification make values >> in the table uncertain?  If so, what rule did you use to resolve >> them?  Does this match the behavior of your scheduler?
+Assume that timer interrupt occured right after thread A . By this way the recent CPU of A gets increased and priority of this thread is recalculated. Then the process goes on to all threads.
+>> C4: How is the way you divided the cost of scheduling between code >> inside and outside interrupt context likely to affect performance?
+---- RATIONALE ----  >> C5: Briefly critique your design, pointing out advantages and >> disadvantages in your design choices.  If you were to have extra >> time to work on this part of the project, how might you choose to >> refine or improve your design?
+
+I read line by line in the document and coded the functions then and there. However I did make small mistake somewhere, which makes my mlfqs-load-60 to start to zero. If i had given extra time i would have defined an abtraction layer for all the operations that i implemented with this method. I would have also changed the implementation of the  refresh_recent_cpu,refresh_priority function to a better way.
+>> C6: The assignment explains arithmetic for fixed-point math in >> detail, but it leaves it open to you to implement it.  Why did you >> decide to implement it the way you did?  If you created an >> abstraction layer for fixed-point math, that is, an abstract data >> type and/or a set of functions or macros to manipulate fixed-point >> numbers, why did you do so?  If not, why not?
+
+Initally i thought of using the fixed point math as it is given by the doc. Like to convert a number a number into floating point i just multiply it by 2^14. Latter i realised that it may lead to many errors when we manually perform every operation then and there. So i declared all the operation in macro as given in the document. It saves lot of space which is a must for kernel level programming.
+
